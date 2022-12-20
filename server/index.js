@@ -7,9 +7,9 @@ app.use(cors());
 app.use(express.json());
 
 const balances = {
-  "0x1": 100,
-  "0x2": 50,
-  "0x3": 75,
+  "5aa70d2edc6b5d0e4310f6fd221f5c70dc6cf447": 100, //Arda
+  "d84d8bf8e67e152218359b38e53c346434d281db": 50, //Alice
+  "5656b0a87d42b7d8e7d2a19ef8c15367f0b3e350": 75, //Bob
 };
 
 app.get("/balance/:address", (req, res) => {
@@ -18,8 +18,10 @@ app.get("/balance/:address", (req, res) => {
   res.send({ balance });
 });
 
-app.post("/send", (req, res) => {
-  const { sender, recipient, amount } = req.body;
+app.post("/send", async (req, res) => {
+  const { message, signature, recipient, amount, recoveryBit } = req.body;
+
+  const sender = await utils.recoverAddress(message, signature, recoveryBit)
 
   setInitialBalance(sender);
   setInitialBalance(recipient);
@@ -29,7 +31,7 @@ app.post("/send", (req, res) => {
   } else {
     balances[sender] -= amount;
     balances[recipient] += amount;
-    res.send({ balance: balances[sender] });
+    res.send({ balance: balasendernces[sender] });
   }
 });
 

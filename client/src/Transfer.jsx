@@ -4,6 +4,9 @@ import server from "./server";
 function Transfer({ address, setBalance }) {
   const [sendAmount, setSendAmount] = useState("");
   const [recipient, setRecipient] = useState("");
+  const [message, setMessage] = useState("");
+  const [signature, setSignature] = useState("");
+  const [recoveryBit, setRecoveryBit] = useState("");
 
   const setValue = (setter) => (evt) => setter(evt.target.value);
 
@@ -17,6 +20,9 @@ function Transfer({ address, setBalance }) {
         sender: address,
         amount: parseInt(sendAmount),
         recipient,
+        message,
+        signature,
+        recoveryBit: parseInt(recoveryBit),
       });
       setBalance(balance);
     } catch (ex) {
@@ -24,7 +30,19 @@ function Transfer({ address, setBalance }) {
     }
   }
 
-  return (
+  function onChangeSendAmount(evt) {
+    const amount = evt.target.value;
+    setSendAmount(amount)
+    setMessage(`${amount} from ${address} to ${recipient}`)
+  }
+
+  function onChangeRecipient(evt) {
+    const recipient = evt.target.value;
+    setRecipient(recipient)
+    setMessage(`${sendAmount} from ${address} to ${recipient}`)
+  }
+
+   return (
     <form className="container transfer" onSubmit={transfer}>
       <h1>Send Transaction</h1>
 
@@ -33,7 +51,7 @@ function Transfer({ address, setBalance }) {
         <input
           placeholder="1, 2, 3..."
           value={sendAmount}
-          onChange={setValue(setSendAmount)}
+          onChange={onChangeSendAmount}
         ></input>
       </label>
 
@@ -42,7 +60,27 @@ function Transfer({ address, setBalance }) {
         <input
           placeholder="Type an address, for example: 0x2"
           value={recipient}
-          onChange={setValue(setRecipient)}
+          onChange={onChangeRecipient}
+        ></input>
+      </label>
+
+      <div>Message to sign: {message}</div>
+
+      <label>
+        Signature
+        <input
+          placeholder="Type resulting signature from signed message"
+          value={signature}
+          onChange={setValue(setSignature)}
+        ></input>
+      </label>
+
+      <label>
+        Recovery Bit
+        <input
+          placeholder="Type resulting recovery bit from signed message"
+          value={recoveryBit}
+          onChange={setValue(setRecoveryBit)}
         ></input>
       </label>
 

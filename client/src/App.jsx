@@ -6,11 +6,13 @@ import { useState } from "react";
 function App() {
   const [balance, setBalance] = useState(0);
   const [address, setAddress] = useState("");
-
+  const [publicKey, setPublicKey] = useState("");
   return (
     <div className="app">
       <Wallet
         balance={balance}
+        publicKey={publicKey}
+        setPublicKey={setPublicKey}
         setBalance={setBalance}
         address={address}
         setAddress={setAddress}
