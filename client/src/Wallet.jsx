@@ -16,7 +16,7 @@ function Wallet({ address, setAddress, balance, setBalance, publicKey, setPublic
       } = await server.get(`balance/${address}`);
       setBalance(balance);
     } else {
-      setBalance(0);
+      setBalance(0)
     }
   }
 
