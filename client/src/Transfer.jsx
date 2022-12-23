@@ -1,28 +1,35 @@
 import { useState } from "react";
+import { hashMessage, signMessage } from "./helpers";
 import server from "./server";
+import { toHex } from "ethereum-cryptography/utils";
 
-function Transfer({ address, setBalance }) {
+function Transfer({ setBalance, privateKey }) {
   const [sendAmount, setSendAmount] = useState("");
   const [recipient, setRecipient] = useState("");
-  const [message, setMessage] = useState("");
-  const [signature, setSignature] = useState("");
-  const [recoveryBit, setRecoveryBit] = useState("");
 
   const setValue = (setter) => (evt) => setter(evt.target.value);
 
   async function transfer(evt) {
     evt.preventDefault();
 
+    // Sign message here to create signature
+    const msg = {
+      amount: parseInt(sendAmount),
+      recipient,
+    };
+    const hashedMessage = hashMessage(msg);
+    const [signature, recoveryBit] = await signMessage(
+      hashedMessage,
+      privateKey
+    );
+
     try {
       const {
         data: { balance },
       } = await server.post(`send`, {
-        sender: address,
-        amount: parseInt(sendAmount),
-        recipient,
-        message,
-        signature,
-        recoveryBit: parseInt(recoveryBit),
+        msg,
+        signature: toHex(signature),
+        recoveryBit,
       });
       setBalance(balance);
     } catch (ex) {
@@ -30,19 +37,7 @@ function Transfer({ address, setBalance }) {
     }
   }
 
-  function onChangeSendAmount(evt) {
-    const amount = evt.target.value;
-    setSendAmount(amount)
-    setMessage(`${amount} from ${address} to ${recipient}`)
-  }
-
-  function onChangeRecipient(evt) {
-    const recipient = evt.target.value;
-    setRecipient(recipient)
-    setMessage(`${sendAmount} from ${address} to ${recipient}`)
-  }
-
-   return (
+  return (
     <form className="container transfer" onSubmit={transfer}>
       <h1>Send Transaction</h1>
 
@@ -51,7 +46,7 @@ function Transfer({ address, setBalance }) {
         <input
           placeholder="1, 2, 3..."
           value={sendAmount}
-          onChange={onChangeSendAmount}
+          onChange={setValue(setSendAmount)}
         ></input>
       </label>
 
@@ -60,27 +55,7 @@ function Transfer({ address, setBalance }) {
         <input
           placeholder="Type an address, for example: 0x2"
           value={recipient}
-          onChange={onChangeRecipient}
-        ></input>
-      </label>
-
-      <div>Message to sign: {message}</div>
-
-      <label>
-        Signature
-        <input
-          placeholder="Type resulting signature from signed message"
-          value={signature}
-          onChange={setValue(setSignature)}
-        ></input>
-      </label>
-
-      <label>
-        Recovery Bit
-        <input
-          placeholder="Type resulting recovery bit from signed message"
-          value={recoveryBit}
-          onChange={setValue(setRecoveryBit)}
+          onChange={setValue(setRecipient)}
         ></input>
       </label>
 
